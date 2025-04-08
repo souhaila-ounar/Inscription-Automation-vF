@@ -11,9 +11,10 @@ export class AsanaClient {
 
   //----- get task by name ------
   async getTaskByName(workspaceId: string, projectId: string, name: string) {
-    const url = `${ASANA_BASE_URL}/${workspaceId}/tasks/search?text=${encodeURIComponent(
+    const url = `${ASANA_BASE_URL}/workspaces/${workspaceId}/tasks/search?text=${encodeURIComponent(
       name
     )}&projects.any=${projectId}`;
+
     const response = await axios.get(url, { headers: this.headers });
     return response.data;
   }

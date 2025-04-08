@@ -15,8 +15,7 @@ export const handleFormSubmission = async (
         .json({ error: "branchID is required and must be a valid number" });
     }
 
-    await runTutoratAutomation(formData, branchId);
-    console.log("Success!");
+    runTutoratAutomation(formData, branchId);
     return res.status(200).json({
       message: "Automatisation exécutée avec succès.",
     });

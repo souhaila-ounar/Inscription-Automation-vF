@@ -17,7 +17,6 @@ export const validateApiKey = (
 
   const apiKey = authHeader.split(" ")[1];
 
-  console.log("config.apiKeys.ourApp", config.apiKeys.ourApp);
   if (apiKey !== config.apiKeys.ourApp) {
     res.status(401).json({
       status: "error",

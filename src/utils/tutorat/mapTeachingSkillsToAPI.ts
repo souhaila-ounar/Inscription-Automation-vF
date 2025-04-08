@@ -150,7 +150,7 @@ export function getFormattedTeachingSkills(
   if (!qual_level) throw new Error("Niveau scolaire non reconnu.");
 
   const mapping = subjectMappingsByLevel[niveau] || {};
-  const subjectArray = rawSubjects.split(",").map((s) => s.trim());
+  const subjectArray = rawSubjects.split(/, (?=[A-ZÉÈÀ])/).map((s) => s.trim());
 
   const result = subjectArray
     .map((subject) => {

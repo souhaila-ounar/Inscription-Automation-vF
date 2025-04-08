@@ -13,8 +13,8 @@ export function formatSubjects({
   const getFieldName = (base: string) =>
     isSecondMandate && base !== "niveau_scolaire_eleve" ? `${base}_2e` : base;
 
-  const niveau = formData[getFieldName("niveau_scolaire_eleve")];
-  const anneeSecondaire = formData[getFieldName("annee_secondaire")];
+  const niveau = formData.niveau_scolaire_eleve;
+  const anneeSecondaire = formData.annee_secondaire;
 
   let niveauExact = niveau;
   let fieldKey = "";

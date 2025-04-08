@@ -1,6 +1,7 @@
 import axios from "axios";
 import { config } from "../../config";
 
+// --- Envoi POST
 export async function sendAutomationRequest(
   endpoint: string,
   data: any
@@ -21,10 +22,13 @@ export async function sendAutomationRequest(
   }
 }
 
+// Envoi vers les 3 endpoints ( jumeleage / Credit card & label à domicile)
+
 export async function sendJobToAutomations(
   jobData: any,
   studentId: number,
-  clientId: number
+  clientId: number,
+  originalJobData?: any // job terminé
 ) {
   const jobId = jobData.id;
   const jobStatus = jobData.status;
@@ -43,6 +47,7 @@ export async function sendJobToAutomations(
       .find((attr: any) => attr.machine_name === "location")
       ?.value?.trim() || "";
 
+  // --- Envoi vers endpoint jumelage
   const jumelageData = {
     events: [
       {
@@ -56,7 +61,9 @@ export async function sendJobToAutomations(
       },
     ],
   };
+  await sendAutomationRequest(config.endpoints.jumelage, jumelageData);
 
+  // --- Envoi vers endpoint creditCard
   const creditCardData = {
     events: [
       {
@@ -82,24 +89,36 @@ export async function sendJobToAutomations(
       },
     ],
   };
-
-  await sendAutomationRequest(config.endpoints.jumelage, jumelageData);
   await sendAutomationRequest(config.endpoints.creditCard, creditCardData);
 
-  if (locationValue.toLowerCase().includes("domicile")) {
-    const inHomeData = {
-      events: [
-        {
-          action: "CHANGED_SERVICE_STATUS",
-          verb: "Changed a Job's status",
-          subject: {
-            id: jobId,
-            status: jobStatus,
+  // --- Envoi vers endpoint addLabelInHome AVEC le mandat terminé
+  if (originalJobData) {
+    const labelAttrs =
+      typeof originalJobData.extra_attrs === "string"
+        ? JSON.parse(originalJobData.extra_attrs || "[]")
+        : originalJobData.extra_attrs || [];
+
+    const originalLocation =
+      labelAttrs
+        .find((attr: any) => attr.machine_name === "location")
+        ?.value?.trim() || "";
+
+    if (originalLocation.toLowerCase().includes("domicile")) {
+      const inHomeData = {
+        events: [
+          {
+            action: "CHANGED_SERVICE_STATUS",
+            verb: "Changed a Job's status",
+            subject: {
+              id: originalJobData.id,
+              status: originalJobData.status,
+            },
+            branch: originalJobData.branch.toString(),
           },
-          branch: branch.toString(),
-        },
-      ],
-    };
-    await sendAutomationRequest(config.endpoints.addLabelInHome, inHomeData);
+        ],
+      };
+
+      await sendAutomationRequest(config.endpoints.addLabelInHome, inHomeData);
+    }
   }
 }

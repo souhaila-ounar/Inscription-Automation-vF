@@ -1,10 +1,11 @@
 {
   "name": "inscriptions",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "start": "ts-node src/index.ts",
+    "start": "node dist/index.js",
+    "prestart": "npm run build",
     "build": "tsc",
     "serve": "node dist/index.js",
     "start:fallback-worker": "ts-node src/workers/fallbackProcessor.ts"

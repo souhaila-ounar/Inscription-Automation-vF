@@ -1,6 +1,8 @@
 import { Worker } from "bullmq";
 import { redisConnection } from "../config/redis";
-import { checkAndFallbackToOnline } from "../services/tutorat/fallbackHandler";
+import { JobFallbackHandler } from "../services/tutorat/fallbackHandler";
+
+const fallbackHandler = new JobFallbackHandler();
 
 export const fallbackWorker = new Worker(
   "fallback-jobs",
@@ -12,7 +14,8 @@ export const fallbackWorker = new Worker(
       branchId: number;
       formData: Record<string, any>;
     };
-    await checkAndFallbackToOnline(data);
+
+    await fallbackHandler.handleFallback(data);
   },
   {
     connection: redisConnection,
