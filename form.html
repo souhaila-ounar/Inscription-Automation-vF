@@ -1,0 +1,293 @@
+<style>
+  #incomplete-btn {
+    display: block !important;
+  }
+  /*
+  .ff-el-is-required {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  */
+
+  .ff-el-is-error input,
+  .ff-el-is-error select,
+  .ff-el-is-error textarea {
+    border: 1px solid red !important;
+  }
+  .new-student {
+    display: none !important;
+  }
+
+  .new-student.visible {
+    display: block !important;
+  }
+  #recipient-dropdown {
+    font-size: 12px;
+    color: grey;
+    margin-top: 2px;
+  }
+
+  select {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #ccc !important;
+    font-size: 16px !important;
+    border-radius: 5px !important;
+    outline: none !important;
+    transition: border-color 0.3s ease !important;
+  }
+
+  select:focus {
+    border-color: #2fa6ff !important;
+  }
+
+  select option {
+    font-size: 15px !important;
+    color: #333 !important;
+  }
+  select:hover {
+    border-color: #2fa6ff !important;
+  }
+
+  .ff-el-group .info-student {
+    margin: 0 !important;
+  }
+  #alertMsg,
+  .NameError {
+    font-weight: 400;
+    color: #f56c6c;
+    font-size: 12px;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+  .error-border {
+    border: 1px solid red !important;
+  }
+</style>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("a").forEach((link) => {
+      link.setAttribute("target", "_self");
+    });
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const formContainer = document.querySelector(".info-student");
+
+    const recipientsParam = urlParams.get("recipients");
+    const dropdownHTML = `
+    <div class="dropdown-container">
+      <div id='recipients_div'>
+        <select id="recipient-dropdown">
+          <option value="">Sélectionnez un élève</option>
+        </select>
+      </div>
+      <p id="alertMsg" style="display:none; color: red;">Ce champ est obligatoire</p>
+    </div>
+  `;
+
+    formContainer.innerHTML += dropdownHTML;
+
+    const recipientDropdown = document.getElementById("recipient-dropdown");
+    const recipientHiddenField = document.querySelector(
+      'input[name="recipient_hidden"]'
+    );
+    const nextBtn = document.querySelector(".ff-btn.ff-btn-submit");
+    const newStudentContainers = document.querySelectorAll(".new-student");
+    const firstName = document.getElementById("ff_121_fisrt_name");
+    const lastName = document.getElementById("ff_121_last_name");
+    const studentInfoSection = document.querySelector(
+      '[data-name="section_break-121_3"]'
+    );
+    const sectionToHide = document.querySelector(
+      '[data-name="custom_html-121_6"]'
+    );
+
+    if (!recipientsParam || recipientsParam.trim() === "") {
+      formContainer.style.display = "none";
+      newStudentContainers.forEach((container) =>
+        container.classList.add("visible")
+      );
+      sectionToHide.style.display = "none";
+    } else {
+      const recipients = recipientsParam.split(",").filter(Boolean);
+      recipientDropdown.innerHTML = `<option value="">Sélectionnez un élève</option>`;
+
+      recipients.forEach((recipient) => {
+        const option = document.createElement("option");
+        option.value = recipient;
+        option.textContent = recipient;
+        recipientDropdown.appendChild(option);
+      });
+
+      const newStudentOption = document.createElement("option");
+      newStudentOption.value = "new_student";
+      newStudentOption.textContent = "Ajouter un nouvel élève";
+      recipientDropdown.appendChild(newStudentOption);
+    }
+
+    recipientDropdown.addEventListener("change", function () {
+      const selectedValue = recipientDropdown.value;
+      if (recipientHiddenField) recipientHiddenField.value = selectedValue;
+
+      newStudentContainers.forEach((container) => {
+        if (selectedValue === "new_student") {
+          container.classList.add("visible");
+        } else {
+          container.classList.remove("visible");
+          container
+            .querySelectorAll(".NameError")
+            .forEach((error) => error.remove());
+        }
+      });
+    });
+
+    const branchMap = {
+      3268: "Tutorax - Tutorat",
+      5737: "Tutorax - Stimulation du langage",
+      7673: "Tutorax - Canada",
+      8427: "Tutorax - Orthopedagogie",
+      15751: "Tutorax - USA",
+      14409: "Tutorax - Orthophonie",
+    };
+
+    const branchParam = urlParams.get("branch");
+    const branchIDField = document.querySelector('input[name="branchID"]');
+
+    if (branchParam && branchIDField) {
+      const matchingID = Object.keys(branchMap).find(
+        (id) => branchMap[id].toLowerCase() === branchParam.toLowerCase()
+      );
+
+      if (matchingID) {
+        branchIDField.value = matchingID;
+        console.log(`Branch ID set to ${matchingID}`);
+      }
+    }
+
+    nextBtn.addEventListener("click", function (e) {
+      let isValid = true;
+      let firstInvalidField = null;
+      document
+        .querySelectorAll(".NameError")
+        .forEach((error) => error.remove());
+
+      // Vérification du prénom
+      if (
+        firstName &&
+        firstName.offsetParent !== null &&
+        !firstName.value.trim()
+      ) {
+        const firstNameError = document.createElement("div");
+        firstNameError.className = "NameError";
+        firstNameError.textContent = "Ce champ est obligatoire";
+        firstNameError.style.color = "red";
+        firstName.parentNode.appendChild(firstNameError);
+        firstName.classList.add("error-border");
+        isValid = false;
+        firstInvalidField = firstInvalidField || firstName;
+      } else if (firstName) {
+        firstName.classList.remove("error-border");
+      }
+
+      // Vérification du nom
+      if (
+        lastName &&
+        lastName.offsetParent !== null &&
+        !lastName.value.trim()
+      ) {
+        const lastNameError = document.createElement("div");
+        lastNameError.className = "NameError";
+        lastNameError.textContent = "Ce champ est obligatoire";
+        lastNameError.style.color = "red";
+        lastName.parentNode.appendChild(lastNameError);
+        lastName.classList.add("error-border");
+        isValid = false;
+        firstInvalidField = firstInvalidField || lastName;
+      } else if (lastName) {
+        lastName.classList.remove("error-border");
+      }
+
+      // Vérification du dropdown
+      if (!recipientDropdown.value && formContainer.style.display !== "none") {
+        document.getElementById("alertMsg").style.display = "block";
+        recipientDropdown.classList.add("error-border");
+        isValid = false;
+        firstInvalidField = firstInvalidField || recipientDropdown;
+      } else {
+        document.getElementById("alertMsg").style.display = "none";
+        recipientDropdown.classList.remove("error-border");
+      }
+
+      //------- valider adresse si location = enPresentiel
+      const inpersonInputV = document.querySelector(
+        'input[name="location"][value*="enPresentiel"]'
+      );
+      const isInpersonSelected = inpersonInputV?.checked;
+
+      const contactAdressv = urlParams.get("contact_address");
+      //---- value ---
+      const streetV =
+        document
+          .querySelector("[name='address_client[address_line_1]']")
+          ?.value.trim() || "";
+      const appartment = document
+        .querySelector('[name="address_client[address_line_2]"]')
+        ?.value.trim();
+      const cityV =
+        document.querySelector("[name='address_client[city]']")?.value.trim() ||
+        "";
+      const zipV =
+        document.querySelector("[name='address_client[zip]']")?.value.trim() ||
+        "";
+
+      //---- fields ---
+
+      const streetInputV = document.querySelector(
+        "[name='address_client[address_line_1]']"
+      );
+      const cityInputV = document.querySelector(
+        "[name='address_client[city]']"
+      );
+      const zipInputV = document.querySelector("[name='address_client[zip]']");
+      const appartmentInputV = document.querySelector(
+        '[name="address_client[address_line_2]"]'
+      );
+      if (
+        isInpersonSelected &&
+        (!contactAdressv || contactAdressv.trim() == "") &&
+        (!streetV || !cityV || !zipV || !appartment)
+      ) {
+        [streetInputV, cityInputV, zipInputV, appartmentInputV].forEach(
+          (input) => {
+            if (input && !input.value.trim()) {
+              const error = document.createElement("div");
+              error.className = "NameError";
+              error.textContent = "Ce champ est obligatoire.";
+              error.style.color = "red";
+              input.classList.add("error-border");
+              input.parentNode.appendChild(error);
+            }
+          }
+        );
+        isValid = false;
+        firstInvalidField =
+          firstInvalidField ||
+          streetInputV ||
+          cityInputV ||
+          zipInputV ||
+          appartmentInputV;
+      }
+
+      if (!isValid) {
+        e.preventDefault();
+        if (studentInfoSection) {
+          studentInfoSection.scrollIntoView({ behavior: "smooth" });
+        } else if (firstInvalidField) {
+          firstInvalidField.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        recipientHiddenField.value = recipientDropdown.value;
+      }
+    });
+  });
+</script>

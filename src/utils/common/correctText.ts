@@ -16,9 +16,6 @@ export async function correctNoteWithAI(
 
   const possibleNoteFields = [
     "description_info_tuteur",
-    "information_tuteur",
-    "infos_tuteur",
-    "commentaire_2e",
     "infos_supplementaires",
   ];
 

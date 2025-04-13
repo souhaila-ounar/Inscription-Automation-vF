@@ -6,7 +6,9 @@ export async function createAdhocChargeIfNeeded(
   branchId: number,
   clientId: number
 ) {
-  if (!formData.Ajouter_les_frais_d_inscription_) return;
+  const frais = formData?.Ajouter_les_frais_d_inscription_;
+
+  if (!(typeof frais === "string" && frais.trim() !== "")) return;
 
   const branch = formData.branch?.trim();
   const province = formData.province_tutorat?.trim();

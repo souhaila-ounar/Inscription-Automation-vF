@@ -22,11 +22,17 @@ export class JobProcessor {
   ) {}
 
   async createAllJobs() {
+    console.log("from creatAlljobs");
     const jobs = [];
     const mainJob = await this.createAndHandleJob(false);
     jobs.push(mainJob);
 
-    if (this.formData.Cr_er_une_2e_demande) {
+    const creation2emmandat = this.formData?.Cr_er_une_2e_demande;
+    if (
+      typeof creation2emmandat === "string" &&
+      creation2emmandat.trim() !== ""
+    ) {
+      console.log("mandats2");
       const secondJob = await this.createAndHandleJob(true);
       jobs.push(secondJob);
     }
@@ -111,7 +117,7 @@ export class JobProcessor {
           clientId: this.clientId,
           branchId: this.branchId,
           formData: this.formData,
-          delayInMs: 15 * 60 * 1000,
+          delayInMs: 7 * 24 * 60 * 60 * 1000,
         });
       }
       if (refused) {

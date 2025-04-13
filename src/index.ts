@@ -15,6 +15,7 @@ const port = 3000;
 // ---------- Middleware
 app.use(express.json());
 
+app.set("trust proxy", true);
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10000,

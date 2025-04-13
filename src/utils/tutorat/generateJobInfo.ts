@@ -47,7 +47,7 @@ export async function generateJobInfo({
   if (location === "enLigne") {
     title = `En ligne : ${formattedSubjects} de ${niveauExact}`;
   } else if (lieu === "Mon domicile") {
-    title = `This is a test - do not apply ${clientVille} (À domicile) : ${formattedSubjects} de ${niveauExact}`;
+    title = `${clientVille} (À domicile) : ${formattedSubjects} de ${niveauExact}`;
   } else if (lieu === "Bibliothèque" || lieu === "École") {
     title = `${
       lieu === "Bibliothèque" ? "À la bibliothèque" : "À l’école"
@@ -114,24 +114,22 @@ export async function generateJobInfo({
     } que l’on **modifie sa demande à en ligne** si nous n’avons pas trouvé de tuteur après 7 jours.`;
   }
   if (formData.tutor_requirements === "true") {
-    let exigencesArray: string[] = [];
+    const exigences =
+      Array.isArray(formData.exigences_tuteur) &&
+      formData.exigences_tuteur.length > 0
+        ? formData.exigences_tuteur.join(", ")
+        : "Aucune exigence précisée.";
 
-    try {
-      exigencesArray = JSON.parse(formData.exigences_tuteur || "[]");
-    } catch (error) {
-      console.warn("exigences_tuteur n'est pas un tableau JSON valide.");
-    }
-
-    notes += `\nExigence du client pour le tuteur : ${exigencesArray.join(
-      ", "
-    )}\n`;
+    notes += `\nExigence du client pour le tuteur : ${exigences}\n${
+      formData?.notes_de_gestion_mandat_tutorat || ""
+    }`;
   }
 
   // --------------------------- Extra attrs -------------------------------------
   const switchToOnline = acceptation?.includes("accepte") ? "true" : "false";
   const extra_attrs = {
     note: notes,
-    coordonnees_job: formData.information_tuteur || "",
+    coordonnees_job: formData?.information_tuteur || "",
     location: location === "enLigne" ? "en-ligne" : "a-domicile",
     origine: "inscription-assistee",
     switch_to_online_after_7_days: switchToOnline || "false",

@@ -4,7 +4,7 @@ import { validateApiKey } from "../middleware/auth";
 
 const router = Router();
 
-router.post("/submit", validateApiKey, handleFormSubmission);
+router.post("/submit", handleFormSubmission);
 /*
 router.post("/test/fallback", async (req, res) => {
   try {

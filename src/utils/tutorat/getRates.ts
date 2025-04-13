@@ -31,7 +31,7 @@ export function getRatesFromFormData(formData: Record<string, any>): Rates {
   if (
     niveauExact.toLowerCase().includes("primaire") ||
     niveauExact.toLowerCase().includes("secondaire") ||
-    niveauExact.toLowerCase().includes("Maternelle")
+    niveauExact.toLowerCase().includes("maternelle")
   ) {
     if (location === "enLigne") {
       return { location, chargeRate: 43, tutorRate: 18 };
@@ -41,6 +41,6 @@ export function getRatesFromFormData(formData: Record<string, any>): Rates {
   } else if (niveauExact === "Cégep" || niveauExact === "Université") {
     return { location: "enLigne", chargeRate: 44, tutorRate: 22 };
   }
-
+  console.log(location);
   return { location, chargeRate: 43, tutorRate: 18 };
 }

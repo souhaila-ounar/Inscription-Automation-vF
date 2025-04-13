@@ -1,27 +1,22 @@
 export function formatLearningDifficulties(
-  hasLearningProblem: string,
-  difficultiesRaw?: string | undefined,
-  otherChallengesText?: string
+  hasLearningDifficulty: string = "Non",
+  difficultiesList?: (string | null | undefined)[] | null,
+  otherDifficulty?: unknown
 ): string {
-  if (hasLearningProblem.includes("Non")) return "Aucune";
-
-  let parsedInput: string[] = [];
-
-  try {
-    parsedInput = difficultiesRaw ? JSON.parse(difficultiesRaw) : [];
-  } catch (error) {
-    console.warn("Échec du parsing des difficultés :", difficultiesRaw);
-    parsedInput = [];
+  if (hasLearningDifficulty === "Non") {
+    return "Aucune";
   }
 
-  let difficulties: string[] = [];
+  const cleanedList = Array.isArray(difficultiesList)
+    ? difficultiesList.filter(
+        (item): item is string =>
+          typeof item === "string" && item.toLowerCase() !== "autre(s)"
+      )
+    : [];
 
-  if (parsedInput.includes("Autre(s)")) {
-    difficulties = parsedInput.filter((d) => d !== "Autre(s)");
-    difficulties.push(otherChallengesText || "(non précisé)");
-  } else {
-    difficulties = parsedInput;
+  if (typeof otherDifficulty === "string" && otherDifficulty.trim()) {
+    cleanedList.push(otherDifficulty.trim());
   }
 
-  return difficulties.join(", ");
+  return cleanedList.join(", ");
 }

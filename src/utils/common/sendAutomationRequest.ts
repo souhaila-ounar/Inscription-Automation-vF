@@ -122,3 +122,23 @@ export async function sendJobToAutomations(
     }
   }
 }
+
+export async function sendInfoClientToKpisendpoint(
+  clientId: number,
+  branchId: number
+) {
+  // --- Envoi vers endpoint kpis
+  const kpisData = {
+    events: [
+      {
+        branch: branchId,
+        extra_msg: "",
+        subject: {
+          id: clientId,
+        },
+      },
+    ],
+  };
+
+  await sendAutomationRequest(config.endpoints.kpis, kpisData);
+}

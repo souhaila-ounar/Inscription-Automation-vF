@@ -123,16 +123,19 @@ export class JobFallbackHandler {
     let notes = `Préférence du client - Genre du tuteur : ${
       formData.genre_tuteur || "Non spécifié"
     }`;
+
     if (formData.tutor_requirements === "true") {
-      try {
-        const exigences = JSON.parse(formData.exigences_tuteur || "[]");
-        notes += `\nExigence du client pour le tuteur : ${exigences.join(
-          ", "
-        )}`;
-      } catch {
-        console.warn("exigences_tuteur n'est pas un tableau JSON valide.");
-      }
+      const exigences =
+        Array.isArray(formData.exigences_tuteur) &&
+        formData.exigences_tuteur.length > 0
+          ? formData.exigences_tuteur.join(", ")
+          : "Aucune exigence précisée.";
+
+      notes += `\nExigence du client pour le tuteur : ${exigences}\n${
+        formData?.notes_de_gestion_mandat_tutorat || ""
+      }`;
     }
+
     return notes;
   }
 

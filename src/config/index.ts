@@ -13,6 +13,7 @@ export const config = {
     jumelage: process.env.PABBLY_ENDPOINT_JUMELAGE || "",
     creditCard: process.env.PABBLY_ENDPOINT_CREDIT_CARD || "",
     addLabelInHome: process.env.PABBLY_ENDPOINT_ADD_LABEL_INHOME || "",
+    kpis: process.env.KPIS_URL || "",
   },
   supabaseConfig: {
     key: process.env.SUPABASE_KEY!,

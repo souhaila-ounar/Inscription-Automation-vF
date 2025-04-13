@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { runTutoratAutomation } from "../services/tutorat/tutoratAutomation.service";
+import { prioritizeStringVersion } from "../utils/common/prioritizeStringVersion";
 
 export const handleFormSubmission = async (
   req: Request,
@@ -7,6 +8,9 @@ export const handleFormSubmission = async (
 ): Promise<any> => {
   try {
     const formData: Record<string, any> = req.body;
+    const { __submission, ...formDataWitoutsubmission } = formData;
+
+    const cleanedFormData = prioritizeStringVersion(formDataWitoutsubmission);
     const branchId = parseInt(formData?.branchID || "0");
 
     if (!branchId) {
@@ -15,7 +19,8 @@ export const handleFormSubmission = async (
         .json({ error: "branchID is required and must be a valid number" });
     }
 
-    runTutoratAutomation(formData, branchId);
+    runTutoratAutomation(cleanedFormData, branchId);
+    console.log(formData);
     return res.status(200).json({
       message: "Automatisation exécutée avec succès.",
     });

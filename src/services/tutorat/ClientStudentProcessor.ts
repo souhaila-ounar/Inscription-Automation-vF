@@ -8,6 +8,7 @@ import { FormatGenderAndSchool } from "../../utils/common/handleGenderAndSchool"
 import { getFormattedDateTimeCanada } from "../../utils/common/date.utils";
 import { getNoteFieldName } from "../../utils/common/noteFieldName";
 import { findStudentIdFromClientRecipients } from "../../utils/common/getStudentIdFromClient";
+import { sendInfoClientToKpisendpoint } from "../../utils/common/sendAutomationRequest";
 
 export class ClientAndStudentProcessor {
   constructor(
@@ -18,6 +19,12 @@ export class ClientAndStudentProcessor {
   async process() {
     const clientData = await this.processClient();
     const studentId = await this.processStudent(clientData.clientId);
+    try {
+      await sendInfoClientToKpisendpoint(clientData.clientId, this.branchId);
+    } catch (err) {
+      console.log("Erreur lors de l'envoi du clientData au KPIs", err);
+    }
+
     return { ...clientData, studentId };
   }
 
@@ -48,15 +55,21 @@ export class ClientAndStudentProcessor {
       send_emails: true,
     };
 
-    if (!contact_address) {
-      Object.assign(payload, {
-        street: adresse.address_line_1,
-        town: adresse.city,
-        postcode: adresse.zip,
-      });
+    if (!contact_address || contact_address.trim() == "") {
+      if (adresse.address_line_1?.trim()) {
+        payload.street = `${adresse.address_line_2} ${
+          adresse.address_line_1 || ""
+        }`.trim();
+      }
+      if (adresse.city?.trim()) {
+        payload.town = adresse.city;
+      }
+      if (adresse.zip?.trim()) {
+        payload.postcode = adresse.zip;
+      }
     }
 
-    if (!client_id) {
+    if (!client_id || client_id.trim() == "") {
       payload.extra_attrs = {
         notes: note,
         langue_de_communication: langue,
@@ -67,10 +80,11 @@ export class ClientAndStudentProcessor {
         credit_card_count: "0",
       };
       const createdClient = await createClient(this.branchId, payload);
+      console.log("client created ! ");
       return {
         clientId: createdClient?.role?.id,
-        clientAdresse: createdClient?.role?.user?.street,
-        clientCity: createdClient?.role?.user?.town,
+        clientAdresse: createdClient?.role?.user?.street || "",
+        clientCity: createdClient?.role?.user?.town || "",
       };
     } else {
       const existingClient = await getClient(this.branchId, client_id);
@@ -90,21 +104,25 @@ export class ClientAndStudentProcessor {
         ...payload,
         id: parseInt(client_id),
       });
-
+      console.log("client updated !");
       return {
         clientId: updatedClient?.role?.id,
-        clientAdresse: updatedClient?.role?.user?.street,
-        clientCity: updatedClient?.role?.user?.town,
+        clientAdresse: updatedClient?.role?.user?.street || "",
+        clientCity: updatedClient?.role?.user?.town || "",
       };
     }
   }
 
   // -- handle Student ----
+
   private async processStudent(clientId: number) {
-    const { recipient_hidden, fisrt_name, last_name, address_client } =
-      this.formData;
-    const isNew =
-      !recipient_hidden || recipient_hidden.toLowerCase() === "new_student";
+    const { fisrt_name, last_name, address_client } = this.formData;
+    const rawRecipient = this.formData?.recipient_hidden;
+    const recipient =
+      typeof rawRecipient === "string" ? rawRecipient.trim().toLowerCase() : "";
+
+    const isNew = recipient === "" || recipient === "new_student";
+
     const studentAttrs = FormatGenderAndSchool({
       branch: this.formData.branch,
       genre: this.formData.genre_eleve,
@@ -119,7 +137,7 @@ export class ClientAndStudentProcessor {
         first_name: fisrt_name,
         last_name: last_name,
         paying_client: clientId,
-        ...address_client,
+        ...(address_client || {}),
         extra_attrs: studentAttrs,
       };
       const student = await createStudent(this.branchId, payload);
@@ -128,24 +146,30 @@ export class ClientAndStudentProcessor {
       const studentId = await findStudentIdFromClientRecipients(
         this.branchId,
         clientId.toString(),
-        recipient_hidden
+        recipient
       );
-      if (!studentId)
+      if (!studentId) {
         throw new Error("Étudiant introuvable dans les recipients.");
+      }
       return studentId;
     }
   }
 
   private buildNote() {
     const notes = [];
-    if (this.formData.Ajouter_les_frais_d_inscription_) {
+    const frais = this.formData?.Ajouter_les_frais_d_inscription_;
+
+    if (typeof frais === "string" && frais.trim() !== "") {
       notes.push(
         `[${getFormattedDateTimeCanada("fr")}]\nFrais d'inscription générés.`
       );
     }
-    if (this.formData.notes_de_gestion_client) {
+
+    const gestionNote = this.formData?.notes_de_gestion_client;
+    if (typeof gestionNote === "string" && gestionNote.trim() !== "") {
       notes.push(this.formData.notes_de_gestion_client.trim());
     }
+
     return notes.join("\n");
   }
 
