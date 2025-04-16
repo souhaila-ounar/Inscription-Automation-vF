@@ -125,7 +125,8 @@ export async function sendJobToAutomations(
 
 export async function sendInfoClientToKpisendpoint(
   clientId: number,
-  branchId: number
+  branchId: number,
+  sellername: string
 ) {
   // --- Envoi vers endpoint kpis
   const kpisData = {
@@ -135,6 +136,7 @@ export async function sendInfoClientToKpisendpoint(
         extra_msg: "",
         subject: {
           id: clientId,
+          sellerName: sellername,
         },
       },
     ],

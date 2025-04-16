@@ -79,4 +79,38 @@ export class TutorCruncherClient {
   async deleteResource(resourceType: ResourceType, id: string): Promise<any> {
     return this.apiRequest(`/${resourceType}/${id}`, "DELETE");
   }
+
+  async addLabelToClient(clientId: number, labelId: number): Promise<any> {
+    return this.apiRequest(`/clients/${clientId}/add_label/`, "POST", {
+      label: labelId,
+    });
+  }
+
+  async addLabelToResource(
+    resourceType: ResourceType,
+    resourceId: number,
+    labelId: number
+  ): Promise<any> {
+    return this.apiRequest(
+      `/${resourceType}/${resourceId}/add_label/`,
+      "POST",
+      {
+        label: labelId,
+      }
+    );
+  }
+
+  async removeLabelFromResource(
+    resourceType: ResourceType,
+    resourceId: number,
+    labelId: number
+  ): Promise<any> {
+    return this.apiRequest(
+      `/${resourceType}/${resourceId}/remove_label/`,
+      "POST",
+      {
+        label: labelId,
+      }
+    );
+  }
 }

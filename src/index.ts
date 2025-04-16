@@ -1,6 +1,6 @@
 import express from "express";
 import rateLimit from "express-rate-limit";
-import { tutoratRoutes } from "./routes/clientRoute";
+import { tutoratRoutes } from "./routes/inscriptionRoute";
 import "./workers/fallbackProcessor";
 import "./workers/followupProcessor";
 import { createBullBoard } from "@bull-board/api";
@@ -8,14 +8,16 @@ import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 import { ExpressAdapter } from "@bull-board/express";
 import { fallbackQueue } from "./queues/fallbackQueue";
 import { followupQueue } from "./queues/followupQueue";
+import incompleteInscriptionRoute from "./routes/incompleteInscriptionRoute";
 
 const app = express();
 const port = 3000;
 
 // ---------- Middleware
 app.use(express.json());
-
 app.set("trust proxy", true);
+app.set("trust proxy", 1);
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10000,
@@ -36,7 +38,7 @@ createBullBoard({
 });
 
 app.use("/admin/queues", serverAdapter.getRouter());
-
+app.use("/api", incompleteInscriptionRoute);
 // API Routes
 app.use("/api", tutoratRoutes);
 

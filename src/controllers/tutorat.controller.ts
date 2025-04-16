@@ -20,7 +20,7 @@ export const handleFormSubmission = async (
     }
 
     runTutoratAutomation(cleanedFormData, branchId);
-    console.log(formData);
+    // console.log(formData);
     return res.status(200).json({
       message: "Automatisation exécutée avec succès.",
     });

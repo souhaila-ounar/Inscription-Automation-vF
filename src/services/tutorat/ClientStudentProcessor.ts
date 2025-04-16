@@ -9,6 +9,7 @@ import { getFormattedDateTimeCanada } from "../../utils/common/date.utils";
 import { getNoteFieldName } from "../../utils/common/noteFieldName";
 import { findStudentIdFromClientRecipients } from "../../utils/common/getStudentIdFromClient";
 import { sendInfoClientToKpisendpoint } from "../../utils/common/sendAutomationRequest";
+import { getcreatedBy } from "../../utils/common/getCreatedBy";
 
 export class ClientAndStudentProcessor {
   constructor(
@@ -19,8 +20,13 @@ export class ClientAndStudentProcessor {
   async process() {
     const clientData = await this.processClient();
     const studentId = await this.processStudent(clientData.clientId);
+    const sellerName = await getcreatedBy(this.formData);
     try {
-      await sendInfoClientToKpisendpoint(clientData.clientId, this.branchId);
+      await sendInfoClientToKpisendpoint(
+        clientData.clientId,
+        this.branchId,
+        sellerName
+      );
     } catch (err) {
       console.log("Erreur lors de l'envoi du clientData au KPIs", err);
     }

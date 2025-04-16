@@ -2,6 +2,7 @@ import { getFormattedDateTimeCanada } from "../common/date.utils";
 import { formatDisponibilitesFromForm } from "../common/formatAvailability";
 import { formatLearningDifficulties } from "./formatLearningDifficulties";
 import { correctNoteWithAI } from "../common/correctText";
+import { getcreatedBy } from "../common/getCreatedBy";
 
 interface GenerateJobInfoInput {
   formData: Record<string, any>;
@@ -58,7 +59,9 @@ export async function generateJobInfo({
         ? `${city1} (À domicile) : ${formattedSubjects} de ${niveauExact}`
         : `${city1} et ${city2} (À domicile) : ${formattedSubjects} de ${niveauExact}`;
   }
-
+  if (formData.debut_seances == "À une date précise") {
+    title = title + ` (${formData.datetime_debut_seance})`;
+  }
   // -------------------------------- Description ------------------------------------
   let description = "Lieu : ";
   if (location === "enLigne") {
@@ -102,13 +105,14 @@ export async function generateJobInfo({
     description += `\n\nNote(s) laissée(s) par le parent : ${correctedNote}`;
   }
 
+  const createdBy = await getcreatedBy(formData);
   // --------------------------- Notes de gestion --------------------------------
-  let notes = `**Inscription assistée** réalisée le ${getFormattedDateTimeCanada(
+  let notes = `**Inscription assistée** réalisée par ${createdBy} le ${getFormattedDateTimeCanada(
     "fr"
-  )}. Préférence du client - Genre du tuteur : ${
+  )}.\nPréférence du client - Genre du tuteur : ${
     formData.genre_tuteur || "Non spécifié"
   }`;
-  if (seanceEnPresentiel) {
+  if (seanceEnPresentiel && formData.debut_seances !== "À une date précise") {
     notes += `\nLe client ${
       acceptation?.includes("accepte") ? "**ACCEPTE**" : "**REFUSE**"
     } que l’on **modifie sa demande à en ligne** si nous n’avons pas trouvé de tuteur après 7 jours.`;

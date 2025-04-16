@@ -3,6 +3,10 @@ dotenv.config();
 
 export const config = {
   urlBaseTC: process.env.URL_BASE_TC!,
+  dialpad: {
+    apiKey: process.env.DIALPAD_API_KEY,
+    baseUrl: "https://dialpad.com/api/v2/",
+  },
   apiKeys: {
     openAI: process.env.OPENAI_KEY || "",
     deepSeek: process.env.DEEPSEEK_KEY || "",

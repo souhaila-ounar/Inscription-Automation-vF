@@ -1,6 +1,7 @@
 const subjectsMap: Record<string, number> = {
   Français: 33161,
   Anglais: 33160,
+  Espagnol: 68860,
   Géographie: 33158,
   "Histoire - Primaire à secondaire 4": 33154,
   "Philosophie - Philosophie et rationalité": 33153,
@@ -23,7 +24,6 @@ const subjectsMap: Record<string, number> = {
   "Sciences (STE/SE) - Secondaire 4 (Enrichi)": 68858,
   "Sciences - Primaire à secondaire 2": 68863,
   "Biologie - Évolution et diversité du vivant": 68849,
-  Espagnol: 68860,
   "Biologie - Structure et fonctionnement du vivant": 68850,
   "Biologie - Biologie humaine": 68852,
   "Biologie - Intégration en biologie humaine": 68851,
@@ -35,13 +35,45 @@ const subjectsMap: Record<string, number> = {
   "Physique - Mécanique": 57367,
   "Mathématiques - Méthodes quantitatives avancées": 58074,
 };
+
 const qualLevels: Record<string, number> = {
   Primaire: 111235,
   Secondaire: 111236,
   Cégep: 111237,
   Université: 111238,
 };
-
+const cegepUnivMapping: Record<string, string> = {
+  Français: "Français",
+  Anglais: "Anglais",
+  Espagnol: "Espagnol",
+  Histoire: "Histoire",
+  Géographie: "Géographie",
+  "Calcul différentiel": "Mathématiques - Calcul différentiel",
+  "Calcul intégral": "Mathématiques - Calcul intégral",
+  "Algèbre linéaire et géométrie vectorielle":
+    "Mathématiques - Algèbre linéaire et géométrie vectorielle",
+  "Méthodes quantitatives avancées":
+    "Mathématiques - Méthodes quantitatives en sciences humaines",
+  "Méthodes quantitatives en sciences humaines":
+    "Mathématiques - Méthodes quantitatives en sciences humaines",
+  "Électricité et magnétisme": "Physique - Électricité et magnétisme",
+  "Physique mécanique": "Physique - Mécanique",
+  "Ondes et physique moderne": "Physique - Ondes et physique moderne",
+  "Physique électronique": "Physique - Physique électronique",
+  "Chimie des solutions": "Chimie - Chimie des solutions",
+  "Chimie générale, la matière": "Chimie - Chimie générale, la matière",
+  "Chimie organique": "Chimie - Chimie organique",
+  "Biologie humaine": "Biologie - Biologie humaine",
+  "Évolution et diversité du vivant":
+    "Biologie - Évolution et diversité du vivant",
+  "Intégration en biologie humaine":
+    "Biologie - Intégration en biologie humaine",
+  "Structure et fonctionnement du vivant":
+    "Biologie - Structure et fonctionnement du vivant",
+  "Éthique et politique": "Philosophie - Éthique et politique",
+  "L’être humain": "Philosophie - L’être humain",
+  "Philosophie et rationalité": "Philosophie - Philosophie et rationalité",
+};
 const subjectMappingsByLevel: Record<string, Record<string, string>> = {
   Primaire: {
     Français: "Français",
@@ -49,7 +81,6 @@ const subjectMappingsByLevel: Record<string, Record<string, string>> = {
     Espagnol: "Espagnol",
     Mathématiques: "Mathématiques - Primaire et Secondaire 1 à 3",
     Sciences: "Sciences - Primaire à secondaire 2",
-    "Sciences (ST/ATS)": "Sciences (ST/ATS) - Secondaire 3-4",
     Géographie: "Géographie",
     Histoire: "Histoire - Primaire à secondaire 4",
   },
@@ -76,41 +107,14 @@ const subjectMappingsByLevel: Record<string, Record<string, string>> = {
     Physique: "Physique - Secondaire 5",
     Chimie: "Chimie - Secondaire 5",
     Géographie: "Géographie",
-    Histoire: "Histoire - Primaire à secondaire 4",
     "Histoire du monde depuis le XVe siècle":
       "Histoire - Histoire du monde depuis le XVe siècle",
     "Initiation à l’histoire de la civilisation occidentale":
-      "Histoire - Initiation à la civilisation occidentale",
+      "Histoire - Initiation à l’histoire de la civilisation occidentale",
+    Histoire: "Histoire - Primaire à secondaire 4",
   },
-  Cégep: {
-    Français: "Français",
-    Anglais: "Anglais",
-    "Calcul différentiel": "Mathématiques - Calcul différentiel",
-    "Calcul intégral": "Mathématiques - Calcul intégral",
-    "Algèbre linéaire et géométrie vectorielle":
-      "Mathématiques - Algèbre linéaire et géométrie vectorielle",
-    "Méthodes quantitatives en sciences humaines":
-      "Mathématiques - Méthodes quantitatives en sciences humaines",
-    "Méthodes quantitatives avancées":
-      "Mathématiques - Méthodes quantitatives en sciences humaines",
-    "Électricité et magnétisme": "Physique - Électricité et magnétisme",
-    "Physique mécanique": "Physique - Mécanique",
-    "Ondes et physique moderne": "Physique - Ondes et physique moderne",
-    "Physique électronique": "Physique - Physique électronique",
-    "Chimie des solutions": "Chimie - Chimie des solutions",
-    "Chimie générale, la matière": "Chimie - Chimie générale, la matière",
-    "Chimie organique": "Chimie - Chimie organique",
-    "Biologie humaine": "Biologie - Biologie humaine",
-    "Évolution et diversité du vivant":
-      "Biologie - Évolution et diversité du vivant",
-    "Intégration en biologie humaine":
-      "Biologie - Intégration en biologie humaine",
-    "Structure et fonctionnement du vivant":
-      "Biologie - Structure et fonctionnement du vivant",
-    "Éthique et politique": "Philosophie - Éthique et politique",
-    "L’être humain": "Philosophie - L’être humain",
-    "Philosophie et rationalité": "Philosophie - Philosophie et rationalité",
-  },
+  Cégep: cegepUnivMapping,
+  Université: cegepUnivMapping,
 };
 
 function getNiveau(niveauExact: string): string {
@@ -128,7 +132,6 @@ function getNiveau(niveauExact: string): string {
     return "Secondaire 4-5";
   if (lower.includes("cégep")) return "Cégep";
   if (lower.includes("université")) return "Université";
-
   return "";
 }
 
